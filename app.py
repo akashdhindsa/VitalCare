@@ -11,7 +11,7 @@ import os
 import plotly.graph_objects as go
 from datetime import datetime, timedelta
 
-st.set_page_config(page_title="Vital Care", page_icon="🩸", layout="wide")
+st.set_page_config(page_title="Vital Care", page_icon="🩸", layout="wide", initial_sidebar_state="expanded")
 
 # ============================================================
 # THEME — dark/moody, red accent. Widget colors come from
@@ -22,11 +22,9 @@ st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800&family=JetBrains+Mono:wght@400;600&display=swap');
 
-/* Hide the hamburger menu and footer, but keep header (sidebar toggle lives there) */
-#MainMenu {visibility: hidden;}
+/* Footer branding removed. Header/toolbar left untouched on purpose —
+   don't risk hiding the sidebar toggle again. */
 footer {visibility: hidden;}
-[data-testid="stToolbar"] {visibility: hidden;}
-header {background: transparent;}
 
 /* Base app background — deep black, not pure Streamlit dark */
 .stApp {
