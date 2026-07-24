@@ -10,7 +10,103 @@ import joblib
 import os
 from datetime import datetime, timedelta
 
-st.set_page_config(page_title="Vital Care", page_icon="❤️", layout="wide")
+st.set_page_config(page_title="Vital Care", page_icon="🩸", layout="wide")
+
+# ============================================================
+# THEME — dark/moody, red accent. Widget colors come from
+# .streamlit/config.toml; this CSS handles everything the
+# native theme engine can't touch (fonts, cards, chrome).
+# ============================================================
+st.markdown("""
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800&family=JetBrains+Mono:wght@400;600&display=swap');
+
+/* Hide default Streamlit chrome */
+#MainMenu, footer, header {visibility: hidden;}
+
+/* Base app background — deep black, not pure Streamlit dark */
+.stApp {
+    background: radial-gradient(circle at 15% 0%, #1a0d0f 0%, #0a0a0a 45%, #050505 100%);
+}
+
+/* Headings in a sharper display font */
+h1, h2, h3 {
+    font-family: 'Orbitron', sans-serif !important;
+    letter-spacing: 0.5px;
+}
+
+h1 {
+    color: #e63946 !important;
+    text-shadow: 0 0 18px rgba(230, 57, 70, 0.35);
+}
+
+/* Numeric/metric values in monospace for that dashboard feel */
+[data-testid="stMetricValue"] {
+    font-family: 'JetBrains Mono', monospace !important;
+    color: #f1f1f1 !important;
+}
+[data-testid="stMetricLabel"] {
+    color: #9a9a9a !important;
+    text-transform: uppercase;
+    font-size: 0.75rem !important;
+    letter-spacing: 1px;
+}
+
+/* Card container styling (Diet Chart uses st.container(border=True)) */
+div[data-testid="stVerticalBlockBorderWrapper"] {
+    background: #121212;
+    border: 1px solid #2a2a2a !important;
+    border-radius: 10px;
+    box-shadow: 0 0 0 1px rgba(230,57,70,0.05), 0 4px 20px rgba(0,0,0,0.4);
+    transition: border-color 0.2s ease;
+}
+div[data-testid="stVerticalBlockBorderWrapper"]:hover {
+    border-color: rgba(230, 57, 70, 0.5) !important;
+}
+
+/* Primary button — sharp, no rounded corporate pill */
+.stButton > button[kind="primary"] {
+    background: linear-gradient(135deg, #e63946, #a4161a);
+    border: none;
+    border-radius: 4px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    box-shadow: 0 4px 14px rgba(230, 57, 70, 0.3);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.stButton > button[kind="primary"]:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(230, 57, 70, 0.5);
+}
+
+/* Sidebar */
+[data-testid="stSidebar"] {
+    background: #0d0d0d;
+    border-right: 1px solid #221111;
+}
+[data-testid="stSidebar"] .stRadio label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.9rem;
+}
+
+/* Slider accent */
+.stSlider [data-baseweb="slider"] div[role="slider"] {
+    background-color: #e63946 !important;
+}
+
+/* Alert boxes — keep semantics (red=risk, green=ok) but darken backgrounds */
+[data-testid="stAlertContentError"], .stAlert:has(> div[data-baseweb="notification"]) {
+    border-radius: 8px;
+}
+
+/* Divider */
+hr {
+    border-color: #221111 !important;
+}
+</style>
+""", unsafe_allow_html=True)
 
 LOG_FILE = "assessment_log.csv"
 
@@ -62,10 +158,10 @@ def log_assessment(row: dict, risk_prob: float):
 
 # ---- Sidebar ----
 with st.sidebar:
-    st.markdown("### ❤️ Vital Care")
-    st.caption("Smart Healthcare Analytics")
+    st.markdown("### 🩸 VITAL // CARE")
+    st.caption("SMART HEALTHCARE ANALYTICS")
     st.markdown("---")
-    st.markdown("**Navigation Menu**")
+    st.markdown("**NAVIGATION**")
     page = st.radio(
         "Navigation",
         ["🔎 Analyse Health", "📈 Weekly Analysis Graph", "🍎 Diet Chart"],
@@ -76,7 +172,7 @@ with st.sidebar:
 # PAGE 1 — Analyse Health
 # ============================================================
 if page == "🔎 Analyse Health":
-    st.markdown("## Analyse Health")
+    st.markdown("## ANALYSE HEALTH")
     st.caption("Enter patient clinical metrics to assess health risk.")
 
     col1, col2 = st.columns(2)
@@ -137,7 +233,7 @@ if page == "🔎 Analyse Health":
                 "🔔 **What to do next?**\n\nMaintain current lifestyle. Recheck periodically."
             )
 
-        st.markdown("### 🔍 Specific Metric Insights")
+        st.markdown("### 🔍 SPECIFIC METRIC INSIGHTS")
         m1, m2, m3, m4 = st.columns(4)
         metric_values = {'Glucose': glucose, 'SystolicBP': bp, 'Cholesterol': cholesterol, 'BMI': bmi}
         metric_labels = {'Glucose': 'Fasting Glucose', 'SystolicBP': 'Systolic Blood Pressure',
@@ -158,7 +254,7 @@ if page == "🔎 Analyse Health":
 # PAGE 2 — Weekly Analysis Graph
 # ============================================================
 elif page == "📈 Weekly Analysis Graph":
-    st.markdown("## Weekly Analysis Graph")
+    st.markdown("## WEEKLY ANALYSIS GRAPH")
 
     if not os.path.exists(LOG_FILE):
         st.warning("No assessments logged yet. Run some analyses on the **Analyse Health** page first.")
@@ -175,7 +271,7 @@ elif page == "📈 Weekly Analysis Graph":
         c1, c2 = st.columns(2)
         with c1:
             st.markdown("#### 📅 Daily Assessment Volume")
-            st.bar_chart(daily.set_index('date')['patient_count'])
+            st.bar_chart(daily.set_index('date')['patient_count'], color="#e63946")
         with c2:
             st.markdown("#### 🩺 Vital Markers Tracking (Average by Day)")
             st.line_chart(daily.set_index('date')[['glucose', 'cholesterol', 'blood_pressure']])
@@ -188,7 +284,7 @@ elif page == "📈 Weekly Analysis Graph":
 # PAGE 3 — Diet Chart
 # ============================================================
 elif page == "🍎 Diet Chart":
-    st.markdown("## Diet Chart")
+    st.markdown("## DIET CHART")
     st.caption("Personalized nutrition guidance based on the most recent flagged assessment.")
 
     if not os.path.exists(LOG_FILE):
