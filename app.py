@@ -20,35 +20,40 @@ st.set_page_config(page_title="Vital Care", page_icon="🩸", layout="wide", ini
 # ============================================================
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800&family=JetBrains+Mono:wght@400;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600&display=swap');
 
 /* Footer branding removed. Header/toolbar left untouched on purpose —
    don't risk hiding the sidebar toggle again. */
 footer {visibility: hidden;}
 
-/* Base app background — deep black, not pure Streamlit dark */
+/* Base app background — warm off-white, not stark white */
 .stApp {
-    background: radial-gradient(circle at 15% 0%, #1a0d0f 0%, #0a0a0a 45%, #050505 100%);
+    background: linear-gradient(180deg, #fdfbf8 0%, #faf7f2 100%);
 }
 
-/* Headings in a sharper display font */
+/* Headings in an elegant serif */
 h1, h2, h3 {
-    font-family: 'Orbitron', sans-serif !important;
-    letter-spacing: 0.5px;
+    font-family: 'Playfair Display', serif !important;
+    color: #2b2420 !important;
 }
 
 h1 {
-    color: #e63946 !important;
-    text-shadow: 0 0 18px rgba(230, 57, 70, 0.35);
+    color: #8c2438 !important;
 }
 
-/* Numeric/metric values in monospace for that dashboard feel */
+/* Body text in a clean sans */
+p, span, div, label {
+    font-family: 'Inter', sans-serif;
+}
+
+/* Numeric/metric values, slightly weighted */
 [data-testid="stMetricValue"] {
-    font-family: 'JetBrains Mono', monospace !important;
-    color: #f1f1f1 !important;
+    font-family: 'Inter', sans-serif !important;
+    font-weight: 600;
+    color: #2b2420 !important;
 }
 [data-testid="stMetricLabel"] {
-    color: #9a9a9a !important;
+    color: #8a7f74 !important;
     text-transform: uppercase;
     font-size: 0.75rem !important;
     letter-spacing: 1px;
@@ -56,56 +61,40 @@ h1 {
 
 /* Card container styling (Diet Chart uses st.container(border=True)) */
 div[data-testid="stVerticalBlockBorderWrapper"] {
-    background: #121212;
-    border: 1px solid #2a2a2a !important;
+    background: #ffffff;
+    border: 1px solid #e8ddd0 !important;
     border-radius: 10px;
-    box-shadow: 0 0 0 1px rgba(230,57,70,0.05), 0 4px 20px rgba(0,0,0,0.4);
-    transition: border-color 0.2s ease;
+    box-shadow: 0 2px 12px rgba(140, 36, 56, 0.06);
+    transition: box-shadow 0.2s ease;
 }
 div[data-testid="stVerticalBlockBorderWrapper"]:hover {
-    border-color: rgba(230, 57, 70, 0.5) !important;
+    box-shadow: 0 4px 20px rgba(140, 36, 56, 0.12);
 }
 
-/* Primary button — sharp, no rounded corporate pill */
+/* Primary button — elegant, not corporate-pill */
 .stButton > button[kind="primary"] {
-    background: linear-gradient(135deg, #e63946, #a4161a);
+    background: linear-gradient(135deg, #8c2438, #5e1424);
     border: none;
     border-radius: 4px;
-    font-weight: 700;
+    font-weight: 600;
     letter-spacing: 0.5px;
-    text-transform: uppercase;
-    font-size: 0.85rem;
-    box-shadow: 0 4px 14px rgba(230, 57, 70, 0.3);
+    box-shadow: 0 3px 10px rgba(140, 36, 56, 0.25);
     transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 .stButton > button[kind="primary"]:hover {
     transform: translateY(-1px);
-    box-shadow: 0 6px 20px rgba(230, 57, 70, 0.5);
+    box-shadow: 0 5px 16px rgba(140, 36, 56, 0.35);
 }
 
 /* Sidebar */
 [data-testid="stSidebar"] {
-    background: #0d0d0d;
-    border-right: 1px solid #221111;
-}
-[data-testid="stSidebar"] .stRadio label {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.9rem;
-}
-
-/* Slider accent */
-.stSlider [data-baseweb="slider"] div[role="slider"] {
-    background-color: #e63946 !important;
-}
-
-/* Alert boxes — keep semantics (red=risk, green=ok) but darken backgrounds */
-[data-testid="stAlertContentError"], .stAlert:has(> div[data-baseweb="notification"]) {
-    border-radius: 8px;
+    background: #f6f0e8;
+    border-right: 1px solid #e8ddd0;
 }
 
 /* Divider */
 hr {
-    border-color: #221111 !important;
+    border-color: #e8ddd0 !important;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -144,28 +133,28 @@ HEALTHY_RANGES = {
 def risk_gauge(risk_prob: float):
     """Semicircular gauge for the risk probability score."""
     pct = risk_prob * 100
-    color = "#e63946" if pct >= 50 else "#2ecc71"
+    color = "#8c2438" if pct >= 50 else "#3a7d44"
     fig = go.Figure(go.Indicator(
         mode="gauge+number",
         value=pct,
-        number={'suffix': "%", 'font': {'size': 40, 'color': '#f1f1f1', 'family': 'JetBrains Mono'}},
+        number={'suffix': "%", 'font': {'size': 40, 'color': '#2b2420', 'family': 'Inter'}},
         gauge={
-            'axis': {'range': [0, 100], 'tickcolor': '#555', 'tickfont': {'color': '#888'}},
+            'axis': {'range': [0, 100], 'tickcolor': '#b0a89c', 'tickfont': {'color': '#8a7f74'}},
             'bar': {'color': color, 'thickness': 0.3},
-            'bgcolor': "#161616",
+            'bgcolor': "#f6f0e8",
             'borderwidth': 0,
             'steps': [
-                {'range': [0, 50], 'color': 'rgba(46, 204, 113, 0.12)'},
-                {'range': [50, 100], 'color': 'rgba(230, 57, 70, 0.12)'},
+                {'range': [0, 50], 'color': 'rgba(58, 125, 68, 0.10)'},
+                {'range': [50, 100], 'color': 'rgba(140, 36, 56, 0.10)'},
             ],
-            'threshold': {'line': {'color': "#f1f1f1", 'width': 3}, 'thickness': 0.8, 'value': 50},
+            'threshold': {'line': {'color': "#2b2420", 'width': 3}, 'thickness': 0.8, 'value': 50},
         }
     ))
     fig.update_layout(
         height=220,
         margin=dict(l=20, r=20, t=30, b=10),
         paper_bgcolor="rgba(0,0,0,0)",
-        font={'color': "#eaeaea"},
+        font={'color': "#2b2420"},
     )
     return fig
 
@@ -204,10 +193,10 @@ with st.sidebar:
 if page == "🔎 Analyse Health":
     st.markdown("""
     <div style="padding: 1.2rem 1.5rem; border-radius: 10px; margin-bottom: 1.2rem;
-                background: linear-gradient(120deg, rgba(230,57,70,0.12), rgba(10,10,10,0));
-                border-left: 3px solid #e63946;">
+                background: linear-gradient(120deg, rgba(140,36,56,0.06), rgba(255,255,255,0));
+                border-left: 3px solid #8c2438;">
         <h2 style="margin:0; padding:0;">ANALYSE HEALTH</h2>
-        <p style="color:#9a9a9a; margin:0.3rem 0 0 0;">Enter patient clinical metrics below — grouped by body system — to generate a risk score.</p>
+        <p style="color:#8a7f74; margin:0.3rem 0 0 0;">Enter patient clinical metrics below — grouped by body system — to generate a risk score.</p>
     </div>
     """, unsafe_allow_html=True)
 
@@ -269,20 +258,20 @@ if page == "🔎 Analyse Health":
         with verdict_col:
             if is_at_risk:
                 st.markdown("""
-                <div style="background:#1a0f10; border:1px solid #e63946; border-radius:8px;
+                <div style="background:#fdf0f2; border:1px solid #8c2438; border-radius:8px;
                             padding:1rem 1.2rem; height:220px; display:flex; flex-direction:column; justify-content:center;">
-                    <span style="color:#e63946; font-weight:700; font-family:'Orbitron',sans-serif;">⚠️ HIGH RISK FLAGGED</span>
-                    <p style="color:#c9c9c9; margin-top:0.6rem; font-size:0.9rem;">
+                    <span style="color:#8c2438; font-weight:700; font-family:'Playfair Display',serif;">⚠️ HIGH RISK FLAGGED</span>
+                    <p style="color:#4a413a; margin-top:0.6rem; font-size:0.9rem;">
                         Multiple clinical risk markers detected. Further clinical evaluation is recommended.
                     </p>
                 </div>
                 """, unsafe_allow_html=True)
             else:
                 st.markdown("""
-                <div style="background:#0f1a12; border:1px solid #2ecc71; border-radius:8px;
+                <div style="background:#f0f7ef; border:1px solid #3a7d44; border-radius:8px;
                             padding:1rem 1.2rem; height:220px; display:flex; flex-direction:column; justify-content:center;">
-                    <span style="color:#2ecc71; font-weight:700; font-family:'Orbitron',sans-serif;">✅ LOW RISK</span>
-                    <p style="color:#c9c9c9; margin-top:0.6rem; font-size:0.9rem;">
+                    <span style="color:#3a7d44; font-weight:700; font-family:'Playfair Display',serif;">✅ LOW RISK</span>
+                    <p style="color:#4a413a; margin-top:0.6rem; font-size:0.9rem;">
                         Clinical metrics fall within an acceptable range based on the model's assessment.
                     </p>
                 </div>
@@ -335,7 +324,7 @@ elif page == "📈 Weekly Analysis Graph":
         c1, c2 = st.columns(2)
         with c1:
             st.markdown("#### 📅 Daily Assessment Volume")
-            st.bar_chart(daily.set_index('date')['patient_count'], color="#e63946")
+            st.bar_chart(daily.set_index('date')['patient_count'], color="#8c2438")
         with c2:
             st.markdown("#### 🩺 Vital Markers Tracking (Average by Day)")
             st.line_chart(daily.set_index('date')[['glucose', 'cholesterol', 'blood_pressure']])
