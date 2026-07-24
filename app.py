@@ -8,6 +8,7 @@ import pandas as pd
 import numpy as np
 import joblib
 import os
+import plotly.graph_objects as go
 from datetime import datetime, timedelta
 
 st.set_page_config(page_title="Vital Care", page_icon="🩸", layout="wide")
@@ -139,6 +140,34 @@ HEALTHY_RANGES = {
     'BMI': (18.5, 24.9, ''),
 }
 
+def risk_gauge(risk_prob: float):
+    """Semicircular gauge for the risk probability score."""
+    pct = risk_prob * 100
+    color = "#e63946" if pct >= 50 else "#2ecc71"
+    fig = go.Figure(go.Indicator(
+        mode="gauge+number",
+        value=pct,
+        number={'suffix': "%", 'font': {'size': 40, 'color': '#f1f1f1', 'family': 'JetBrains Mono'}},
+        gauge={
+            'axis': {'range': [0, 100], 'tickcolor': '#555', 'tickfont': {'color': '#888'}},
+            'bar': {'color': color, 'thickness': 0.3},
+            'bgcolor': "#161616",
+            'borderwidth': 0,
+            'steps': [
+                {'range': [0, 50], 'color': 'rgba(46, 204, 113, 0.12)'},
+                {'range': [50, 100], 'color': 'rgba(230, 57, 70, 0.12)'},
+            ],
+            'threshold': {'line': {'color': "#f1f1f1", 'width': 3}, 'thickness': 0.8, 'value': 50},
+        }
+    ))
+    fig.update_layout(
+        height=220,
+        margin=dict(l=20, r=20, t=30, b=10),
+        paper_bgcolor="rgba(0,0,0,0)",
+        font={'color': "#eaeaea"},
+    )
+    return fig
+
 def log_assessment(row: dict, risk_prob: float):
     """Append this assessment to the running log, used by Weekly Analysis Graph."""
     entry = {
@@ -172,24 +201,49 @@ with st.sidebar:
 # PAGE 1 — Analyse Health
 # ============================================================
 if page == "🔎 Analyse Health":
-    st.markdown("## ANALYSE HEALTH")
-    st.caption("Enter patient clinical metrics to assess health risk.")
+    st.markdown("""
+    <div style="padding: 1.2rem 1.5rem; border-radius: 10px; margin-bottom: 1.2rem;
+                background: linear-gradient(120deg, rgba(230,57,70,0.12), rgba(10,10,10,0));
+                border-left: 3px solid #e63946;">
+        <h2 style="margin:0; padding:0;">ANALYSE HEALTH</h2>
+        <p style="color:#9a9a9a; margin:0.3rem 0 0 0;">Enter patient clinical metrics below — grouped by body system — to generate a risk score.</p>
+    </div>
+    """, unsafe_allow_html=True)
 
-    col1, col2 = st.columns(2)
-    with col1:
-        age = st.slider("Age (years)", 18, 100, 45)
-        bmi = st.slider("BMI (Body Mass Index)", 15.0, 50.0, 25.0, step=0.1)
-        pregnancies = st.number_input("Pregnancies", 0, 15, 0)
-        dpf = st.slider("Diabetes Pedigree Function", 0.05, 2.5, 0.5, step=0.01)
-        heart_rate = st.slider("Resting Heart Rate (bpm)", 40, 150, 72)
-    with col2:
-        glucose = st.slider("Glucose Level (mg/dL)", 50, 300, 100)
-        bp = st.slider("Systolic Blood Pressure (mmHg)", 70, 220, 120)
-        cholesterol = st.slider("Cholesterol Level (mg/dL)", 100, 400, 180)
-        skin_thickness = st.slider("Skin Thickness (mm)", 5.0, 60.0, 20.0, step=0.1)
-        insulin = st.slider("Insulin Level (\u00b5U/mL)", 0.0, 400.0, 100.0, step=1.0)
+    with st.container(border=True):
+        st.markdown("#### 🫀 Vitals & Body")
+        v1, v2, v3 = st.columns(3)
+        with v1:
+            age = st.slider("Age (years)", 18, 100, 45)
+        with v2:
+            bmi = st.slider("BMI (Body Mass Index)", 15.0, 50.0, 25.0, step=0.1)
+        with v3:
+            heart_rate = st.slider("Resting Heart Rate (bpm)", 40, 150, 72)
 
-    submitted = st.button("Analyse Health Risk", type="primary")
+    with st.container(border=True):
+        st.markdown("#### 🩸 Metabolic Markers")
+        m1, m2, m3 = st.columns(3)
+        with m1:
+            glucose = st.slider("Glucose Level (mg/dL)", 50, 300, 100)
+        with m2:
+            bp = st.slider("Systolic Blood Pressure (mmHg)", 70, 220, 120)
+        with m3:
+            cholesterol = st.slider("Cholesterol Level (mg/dL)", 100, 400, 180)
+
+    with st.container(border=True):
+        st.markdown("#### 📋 History & Other Markers")
+        h1, h2, h3, h4 = st.columns(4)
+        with h1:
+            pregnancies = st.number_input("Pregnancies", 0, 15, 0)
+        with h2:
+            dpf = st.slider("Diabetes Pedigree Fn.", 0.05, 2.5, 0.5, step=0.01)
+        with h3:
+            skin_thickness = st.slider("Skin Thickness (mm)", 5.0, 60.0, 20.0, step=0.1)
+        with h4:
+            insulin = st.slider("Insulin (\u00b5U/mL)", 0.0, 400.0, 100.0, step=1.0)
+
+    st.markdown("")
+    submitted = st.button("Analyse Health Risk", type="primary", use_container_width=True)
 
     if submitted:
         patient = {
@@ -206,25 +260,34 @@ if page == "🔎 Analyse Health":
         log_assessment(patient, risk_prob)
 
         st.markdown("---")
-        left, right = st.columns([2, 1])
+        gauge_col, verdict_col, next_col = st.columns([1.1, 1.3, 1.1])
 
-        with left:
+        with gauge_col:
+            st.plotly_chart(risk_gauge(risk_prob), use_container_width=True, config={'displayModeBar': False})
+
+        with verdict_col:
             if is_at_risk:
-                st.error(
-                    f"**⚠️ ALERT: High Health Risk Flagged**\n\n"
-                    f"Our machine learning analysis indicates that this patient exhibits "
-                    f"multiple clinical risk markers. Further clinical evaluation is recommended.\n\n"
-                    f"**Model Risk Probability Score: {risk_prob*100:.1f}%**"
-                )
+                st.markdown("""
+                <div style="background:#1a0f10; border:1px solid #e63946; border-radius:8px;
+                            padding:1rem 1.2rem; height:220px; display:flex; flex-direction:column; justify-content:center;">
+                    <span style="color:#e63946; font-weight:700; font-family:'Orbitron',sans-serif;">⚠️ HIGH RISK FLAGGED</span>
+                    <p style="color:#c9c9c9; margin-top:0.6rem; font-size:0.9rem;">
+                        Multiple clinical risk markers detected. Further clinical evaluation is recommended.
+                    </p>
+                </div>
+                """, unsafe_allow_html=True)
             else:
-                st.success(
-                    f"**✅ Low Health Risk**\n\n"
-                    f"This patient's clinical metrics fall within an acceptable range based on "
-                    f"our model's assessment.\n\n"
-                    f"**Model Risk Probability Score: {risk_prob*100:.1f}%**"
-                )
+                st.markdown("""
+                <div style="background:#0f1a12; border:1px solid #2ecc71; border-radius:8px;
+                            padding:1rem 1.2rem; height:220px; display:flex; flex-direction:column; justify-content:center;">
+                    <span style="color:#2ecc71; font-weight:700; font-family:'Orbitron',sans-serif;">✅ LOW RISK</span>
+                    <p style="color:#c9c9c9; margin-top:0.6rem; font-size:0.9rem;">
+                        Clinical metrics fall within an acceptable range based on the model's assessment.
+                    </p>
+                </div>
+                """, unsafe_allow_html=True)
 
-        with right:
+        with next_col:
             st.info(
                 "🔔 **What to do next?**\n\n"
                 "👉 Check out the **Diet Chart** tab! We have customized a nutrition plan "
