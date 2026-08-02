@@ -3,5 +3,6 @@ pandas
 numpy
 scikit-learn
 joblib
+xgboost
 plotly
  
